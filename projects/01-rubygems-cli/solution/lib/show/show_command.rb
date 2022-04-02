@@ -1,4 +1,4 @@
-require './lib/api_call'
+require './lib/api_call_cache'
 require './lib/show/help_show_command'
 require './lib/info_result'
 
@@ -29,7 +29,7 @@ class ShowCommand
   end
 
   def result
-    result = ApiCall.show(@name)
+    result = ApiCallCache.show(@name)
 
     if result.success?
       return ShowResult.new(result.data['name'], result.data['info'])

@@ -1,4 +1,4 @@
-require './lib/api_call'
+require './lib/api_call_cache'
 require './lib/search/help_search_command'
 require './lib/info_result'
 require './lib/search/search_options_parser'
@@ -53,7 +53,7 @@ class SearchCommand
   end
 
   def result
-    results = ApiCall.search(@query)
+    results = ApiCallCache.search(@query)
     if results.success?
       results.data = filter(results)
       return InfoResult.new('No results found after filtering') unless results.data.length != 0

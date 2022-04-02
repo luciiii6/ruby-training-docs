@@ -4,13 +4,13 @@ require './results/success'
 require './results/failure'
 require './lib/gem_api'
 
-BASE_URL = 'https://rubygems.org/api/v1'
+
 
 class ApiCall
+  BASE_URL = 'https://rubygems.org/api/v1'
   Faraday.default_adapter = :net_http
 
-  class << self
-    
+  class << self   
     def show(name)
       url_completion = "/gems/#{name}.json"
       url = BASE_URL + url_completion
@@ -34,5 +34,10 @@ class ApiCall
         Failure.new('message' => response.body)
       end 
     end
+
+    def keygen(url)
+      Digest::MD5.hexdigest(url)
+    end
   end
+
 end
