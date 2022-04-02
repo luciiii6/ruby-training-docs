@@ -8,10 +8,10 @@ class SearchOptionsParser
       begin
         options = []
         optparse = OptionParser.new do |opts|
-          opts.on('--license LICENSE', 'Show the gem information') do |license|
+          opts.on('--license LICENSE', 'Return gems with introduced license') do |license|
               options.append(SearchOptionLicense.new(license))
           end
-          opts.on('--most-downloads-first', 'Show gems found by entered text') do
+          opts.on('--most-downloads-first', 'Return descending order by downloads') do
               options.append(SearchOptionDownloads.new)
           end
         end
