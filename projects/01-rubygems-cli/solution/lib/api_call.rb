@@ -1,5 +1,5 @@
 require 'faraday'
-require './lib/show_command'
+require './lib/show/show_command'
 require './results/success'
 require './results/failure'
 require './lib/gem_api'

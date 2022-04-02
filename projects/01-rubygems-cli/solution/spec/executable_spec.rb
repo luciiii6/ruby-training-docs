@@ -1,5 +1,5 @@
 require './lib/executable'
-require './lib/show_command'
+require './lib/show/show_command'
 
 RSpec.describe Executable do
 

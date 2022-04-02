@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require './lib/show_command'
+require './lib/show/show_command'
 require './lib/help_command'
-require './lib/search_command'
+require './lib/search/search_command'
 
 class CommandParser
   class << self

@@ -1,5 +1,5 @@
 require './lib/api_call'
-require './lib/help_show_command'
+require './lib/show/help_show_command'
 require './lib/info_result'
 
 class ShowCommand

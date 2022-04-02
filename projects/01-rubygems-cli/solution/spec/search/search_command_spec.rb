@@ -1,4 +1,4 @@
-require './lib/search_command'
+require './lib/search/search_command'
 
 RSpec.describe SearchCommand do
 
