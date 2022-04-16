@@ -8,6 +8,8 @@ require './lib/password_crypter'
 require './lib/validators/account_validator'
 require './lib/token_generator'
 require './lib/password_crypter'
+require './lib/database/user'
+require './lib/database/user_token'
 
 class MemeApi < Sinatra::Application
 
@@ -43,43 +45,41 @@ class MemeApi < Sinatra::Application
     database.insert_token(token)
     
     [201, {"user": {"token": token} }.to_json]
-  rescue AccountValidator::ValidationError
+  rescue AccountValidator::ValidationError => e
     [400, {"errors": ["message": e.message]}.to_json]
   rescue Database::UserExistsError => e
     [409, {"errors": ["message": e.message]}.to_json]
   end
+
+  post '/login' do
+    params = JSON.parse(request.body.read)
+    AccountValidator.validate_account(params)
+    user = database.get_user(params['user']['username'])
+    AccountValidator.validate_password(user.password, params['user']['password'])
+    token = database.get_tokens(user.username)['token']
+
+    [200, {"user": {"token": token } }.to_json]
+  rescue AccountValidator::ValidationError => e
+    [400, {"errors": ["message": e.message]}.to_json]
+  rescue Database::NonExistentUserError => e
+    [400, {"errors": ["message": e.message]}.to_json]
+  rescue StandardError => e
+    pp e
+  end
+
+  private
 
   def create_user(params)
     username = params['user']['username']
     password = params['user']['password']
     hashed_password = PasswordCrypter.encrypt(password)
 
-    User.new(username: username, password: hashed_password)
+    User.new(username, hashed_password)
   end
 
   def generate_token(user)
-    UserToken.new(user: user, value: TokenGenerator.generate)
+    UserToken.new(user, TokenGenerator.generate)
   end
-  
-
-  post '/login' do
-    json_body = JSON.parse(request.body.read)
-    username, password = AccountValidator.validate_account(json_body)
-    hashed = database.get_user(username)['password']
-    PasswordCrypter.equal?(hashed,password)
-    token = database.get_tokens(username)['token']
-
-    [200, {"user": {"token": token } }.to_json]
-  rescue AccountValidator::ValidationError
-    [400, {"errors": ["message": e.message]}.to_json]
-  rescue PasswordCrypter::WrongPasswordError => e
-    [400, {"errors": ["message": e.message]}.to_json]
-  rescue Database::NonExistentUserError => e
-    [400, {"errors": ["message": e.message]}.to_json]
-    
-  end
-
-  private
 
   def database
     Database.create

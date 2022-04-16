@@ -1,5 +1,7 @@
 require 'sqlite3'
 require 'pry'
+require './lib/database/user'
+require './lib/database/user_token'
 
 class Database
   PATH = './database.db'
@@ -42,7 +44,7 @@ class Database
       WHERE username = '#{username}';
     "
     raise Database::NonExistentUserError.new('This username does not exist.') unless result.first
-    result.first
+    User.new(result.first['username'], result.first['password'])
   end
 
   def get_tokens(username)

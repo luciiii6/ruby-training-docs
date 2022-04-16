@@ -1,4 +1,7 @@
 require './lib/database/database'
+require './lib/database/user'
+require './lib/database/user_token'
+
 RSpec.describe Database do
     subject(:db) { Database.create } 
 
@@ -15,10 +18,9 @@ RSpec.describe Database do
 
     end
     context 'add user' do
-      let(:username) { 'luci' }
-      let(:password) { 'test' }
+      let(:user) { User.new('luci','test') }
       it 'should return true' do
-        expect(db.insert_user(username, password)).to be true
+        expect(db.insert_user(user)).to be true
       end
     end
 

@@ -13,7 +13,7 @@ RSpec.describe AccountValidator do
       subject(:account_validation) { AccountValidator.validate_account(body) }
 
       it 'with good body request' do
-        expect(account_validation).to eq ['mr_bean', 'test123']
+        expect(account_validation).to eq true
       end
   
     end
@@ -27,7 +27,7 @@ RSpec.describe AccountValidator do
       subject(:account_validation) { AccountValidator.validate_account(body) }
 
       it 'raises password empty error' do
-        expect{ account_validation }.to raise_error(AccountValidator::EmptyParameterError,'Password is blank')
+        expect{ account_validation }.to raise_error(AccountValidator::ValidationError,'Password is blank')
       end
     end
 
@@ -41,7 +41,7 @@ RSpec.describe AccountValidator do
       subject(:account_validation) { AccountValidator.validate_account(body) }
 
       it 'raises username empty error' do
-        expect{ account_validation }.to raise_error(AccountValidator::EmptyParameterError,'Username is blank')
+        expect{ account_validation }.to raise_error(AccountValidator::ValidationError,'Username is blank')
       end
     end
   end
