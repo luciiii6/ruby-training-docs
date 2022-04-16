@@ -1,6 +1,6 @@
-require './lib/validators/account_validator'
+require './lib/validators/signup_validator'
 
-RSpec.describe AccountValidator do
+RSpec.describe SignupValidator do
   describe '.validate_account' do
     context 'validate request body for account' do
       let(:body) { JSON.parse('{
@@ -10,7 +10,7 @@ RSpec.describe AccountValidator do
         }
       }')
     }
-      subject(:account_validation) { AccountValidator.validate_account(body) }
+      subject(:account_validation) { SignupValidator.validate_account(body) }
 
       it 'with good body request' do
         expect(account_validation).to eq true
@@ -24,10 +24,10 @@ RSpec.describe AccountValidator do
           "password": ""
         }
       }') }
-      subject(:account_validation) { AccountValidator.validate_account(body) }
+      subject(:account_validation) { SignupValidator.validate_account(body) }
 
       it 'raises password empty error' do
-        expect{ account_validation }.to raise_error(AccountValidator::ValidationError,'Password is blank')
+        expect{ account_validation }.to raise_error(SignupValidator::ValidationError,'Password is blank')
       end
     end
 
@@ -38,10 +38,10 @@ RSpec.describe AccountValidator do
           "password": "213215"
         }
       }') }
-      subject(:account_validation) { AccountValidator.validate_account(body) }
+      subject(:account_validation) { SignupValidator.validate_account(body) }
 
       it 'raises username empty error' do
-        expect{ account_validation }.to raise_error(AccountValidator::ValidationError,'Username is blank')
+        expect{ account_validation }.to raise_error(SignupValidator::ValidationError,'Username is blank')
       end
     end
   end

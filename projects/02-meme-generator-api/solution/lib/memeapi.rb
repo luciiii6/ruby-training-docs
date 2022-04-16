@@ -5,7 +5,8 @@ require './lib/validators/meme_validator'
 require './lib/image_creator'
 require './lib/database/database'
 require './lib/password_crypter'
-require './lib/validators/account_validator'
+require './lib/validators/login_validator'
+require './lib/validators/signup_validator'
 require './lib/token_generator'
 require './lib/password_crypter'
 require './lib/database/user'
@@ -38,14 +39,14 @@ class MemeApi < Sinatra::Application
 
   post '/signup' do
     params = JSON.parse(request.body.read)
-    AccountValidator.validate_account(params)
+    SignupValidator.validate_account(params)
     user = create_user(params)
     database.insert_user(user)
     token = generate_token(user)
     database.insert_token(token)
     
     [201, {"user": {"token": token} }.to_json]
-  rescue AccountValidator::ValidationError => e
+  rescue SignupValidator::ValidationError => e
     [400, {"errors": ["message": e.message]}.to_json]
   rescue Database::UserExistsError => e
     [409, {"errors": ["message": e.message]}.to_json]
@@ -53,13 +54,13 @@ class MemeApi < Sinatra::Application
 
   post '/login' do
     params = JSON.parse(request.body.read)
-    AccountValidator.validate_account(params)
+    LoginValidator.validate_account(params)
     user = database.get_user(params['user']['username'])
-    AccountValidator.validate_password(user.password, params['user']['password'])
+    LoginValidator.validate_password(user.password, params['user']['password'])
     token = database.get_tokens(user.username)['token']
 
     [200, {"user": {"token": token } }.to_json]
-  rescue AccountValidator::ValidationError => e
+  rescue LoginValidator::ValidationError => e
     [400, {"errors": ["message": e.message]}.to_json]
   rescue Database::NonExistentUserError => e
     [400, {"errors": ["message": e.message]}.to_json]
