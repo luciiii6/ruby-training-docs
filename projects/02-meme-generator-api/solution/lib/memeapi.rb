@@ -21,6 +21,8 @@ class MemeApi < Sinatra::Application
   end
 
   post '/memes' do
+    halt 401, 'User not logged in' unless request.env['Authorization']
+    database.validate_token(request.env['Authorization'])
     json_body = JSON.parse(request.body.read)
     MemeValidator.validate_image(json_body)
     image_path = Download.download_image(json_body['meme']['image_url'])
@@ -30,6 +32,8 @@ class MemeApi < Sinatra::Application
       status 404
     rescue MemeValidator::Error => e
       status 400
+    rescue Database::NonExistentTokenError => e
+      status 410
   end
 
   get '/memes/:file' do
@@ -45,7 +49,7 @@ class MemeApi < Sinatra::Application
     token = generate_token(user)
     database.insert_token(token)
     
-    [201, {"user": {"token": token} }.to_json]
+    [201, {"user": {"token": token.value} }.to_json]
   rescue SignupValidator::ValidationError => e
     [400, {"errors": ["message": e.message]}.to_json]
   rescue Database::UserExistsError => e
@@ -64,8 +68,6 @@ class MemeApi < Sinatra::Application
     [400, {"errors": ["message": e.message]}.to_json]
   rescue Database::NonExistentUserError => e
     [400, {"errors": ["message": e.message]}.to_json]
-  rescue StandardError => e
-    pp e
   end
 
   private

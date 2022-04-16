@@ -12,6 +12,9 @@ class Database
   class NonExistentUserError < StandardError
   end
 
+  class NonExistentTokenError < StandardError
+  end
+
   class << self
     def create()
       @instance ||= new
@@ -54,6 +57,15 @@ class Database
       WHERE username = '#{username}';
     "
     result.first
+  end
+
+  def validate_token(token)
+    result = @db.execute "
+      SELECT * 
+      FROM UsersTokens
+      WHERE token = '#{token}';
+    "
+    raise Database::NonExistentTokenError.new unless result.first
   end
 
   def insert_user(user)
