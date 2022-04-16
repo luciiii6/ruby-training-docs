@@ -8,7 +8,7 @@ RSpec.describe MemeApi do
   end
 
   describe "POST /memes" do
-    token = nil
+    let(:token) { JSON.parse(last_response.body)["user"]["token"] }
     before(:each) do
       sign_body = {
         "user": {
@@ -17,9 +17,9 @@ RSpec.describe MemeApi do
         }
       }
       post '/signup', sign_body.to_json, { 'CONTENT_TYPE' => 'application/json' }
-      token = JSON.parse(last_response.body)["user"]["token"]
+      
     end
-
+    
     context 'with good body request' do
       it "returns status 303 and redirect link" do
         body = {
@@ -33,6 +33,21 @@ RSpec.describe MemeApi do
 
         expect(last_response.status).to eq 303
         expect(last_response.location).to eq 'http://example.org/memes/test.original.jpg'
+      end
+    end
+
+    context 'without authorization token' do
+      it "returns status 401" do
+        body = {
+          "meme": {
+            "image_url": "https://s3.amazonaws.com/com.twilio.prod.twilio-docs/images/test.original.jpg",
+            "text": "You got Rick-rolled"
+          }
+        }
+
+        post '/memes', body.to_json, { 'Authorization'=> 'token', 'CONTENT_TYPE' => 'application/json' }
+
+        expect(last_response.status).to eq 401
       end
     end
 

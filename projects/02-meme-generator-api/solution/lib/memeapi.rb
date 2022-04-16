@@ -11,6 +11,7 @@ require './lib/token_generator'
 require './lib/password_crypter'
 require './lib/database/user'
 require './lib/database/user_token'
+require './lib/response'
 
 class MemeApi < Sinatra::Application
 
@@ -21,19 +22,18 @@ class MemeApi < Sinatra::Application
   end
 
   post '/memes' do
-    halt 401, 'User not logged in' unless request.env['Authorization']
     database.validate_token(request.env['Authorization'])
     json_body = JSON.parse(request.body.read)
     MemeValidator.validate_image(json_body)
     image_path = Download.download_image(json_body['meme']['image_url'])
     image_name = ImageCreator.create_meme(image_path, json_body['meme']['text'])
     redirect "/memes/#{image_name}", 303
-    rescue Download::Error => e
-      [404, "Wrong image link"]
-    rescue MemeValidator::Error => e
-      [400, "Request body incorrect"]
-    rescue Database::NonExistentTokenError => e
-      [410]
+    rescue Download::Error
+      [404, ErrorResponse.new("Wrong image link").to_json]
+    rescue MemeValidator::Error
+      [400, ErrorResponse.new("Request body incorrect").to_json]
+    rescue Database::NonExistentTokenError
+      [401, ErrorResponse.new("Not authorized").to_json]
   end
 
   get '/memes/:file' do
@@ -51,9 +51,9 @@ class MemeApi < Sinatra::Application
     
     [201, {"user": {"token": token.value} }.to_json]
   rescue SignupValidator::ValidationError => e
-    [400, {"errors": ["message": e.message]}.to_json]
+    [400, ErrorResponse.new(e.message).to_json]
   rescue Database::UserExistsError => e
-    [409, {"errors": ["message": e.message]}.to_json]
+    [409, ErrorResponse.new(e.message).to_json]
   end
 
   post '/login' do
@@ -65,9 +65,9 @@ class MemeApi < Sinatra::Application
 
     [200, {"user": {"token": token } }.to_json]
   rescue LoginValidator::ValidationError => e
-    [400, {"errors": ["message": e.message]}.to_json]
+    [400, ErrorResponse.new(e.message).to_json]
   rescue Database::NonExistentUserError => e
-    [400, {"errors": ["message": e.message]}.to_json]
+    [400, ErrorResponse.new(e.message).to_json]
   end
 
   private
@@ -86,6 +86,5 @@ class MemeApi < Sinatra::Application
 
   def database
     Database.create
-  end
-  
+  end 
 end
