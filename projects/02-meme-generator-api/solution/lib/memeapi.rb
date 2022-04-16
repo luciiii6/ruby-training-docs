@@ -29,11 +29,11 @@ class MemeApi < Sinatra::Application
     image_name = ImageCreator.create_meme(image_path, json_body['meme']['text'])
     redirect "/memes/#{image_name}", 303
     rescue Download::Error => e
-      status 404
+      [404, "Wrong image link"]
     rescue MemeValidator::Error => e
-      status 400
+      [400, "Request body incorrect"]
     rescue Database::NonExistentTokenError => e
-      status 410
+      [410]
   end
 
   get '/memes/:file' do
