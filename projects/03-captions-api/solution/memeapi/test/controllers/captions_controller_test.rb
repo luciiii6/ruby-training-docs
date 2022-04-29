@@ -15,7 +15,7 @@ class CaptionsControllerTest < ActionDispatch::IntegrationTest
       post captions_url, params: { caption: { caption_url: @caption.caption_url, text: @caption.text, url: @caption.url } }, as: :json
     end
 
-    assert_response :created
+    assert_response 303
   end
 
   test "should show caption" do
