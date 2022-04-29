@@ -18,7 +18,7 @@ class CaptionsController < ApplicationController
     @caption = Caption.new(caption_params)
 
     if @caption.save
-      render json: @caption, status: :created, location: @caption
+      render json: @caption, status: 303, location: @caption
     else
       render json: @caption.errors, status: :unprocessable_entity
     end
